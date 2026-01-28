@@ -653,6 +653,19 @@
         }
 
 
+        /* ===== SCREEN 1 PARAGRAPH SOFT FADE-IN ===== */
+        .s1-fade {
+            opacity: 0;
+            transform: translateY(12px);
+            transition: opacity 1.4s ease, transform 1.4s ease;
+        }
+
+        .s1-fade.show {
+            opacity: 0.95;
+            transform: translateY(0);
+        }
+
+
         /* ===== GPU FORCE FOR SMOOTHNESS ===== */
         .card,
         .confetti,
@@ -709,15 +722,11 @@
                 Something Special Awaits 🌸
             </h1>
 
-            <p class="type-s1"
-                data-text="Tap gently… I’ve poured a little piece of my heart into a small effort to create something truly special just for you 💖">
+            <p class="s1-fade">
+                Tap gently… I’ve poured a little piece of my heart into a small effort to create something truly special
+                just for you 💖
             </p>
 
-            <br>
-
-            <p class="type-s1"
-                data-text="I hope this brings a smile to your heart and reminds you that you are truly someone’s special one, and how deeply cherished you are ✨">
-            </p>
 
             <div class="btn" onclick="next(2)">
                 Tap to Continue
@@ -725,7 +734,7 @@
 
         </div>
 
-        
+
 
         <!-- ========== SCREEN 2 ========== -->
 
@@ -1016,41 +1025,31 @@
             if (n === 1) {
 
                 const title = document.querySelector("#s1 .s2-title");
-                title.classList.remove("show");
+                const para = document.querySelector("#s1 .s1-fade");
+                const btn = document.querySelector("#s1 .btn");
 
-                clearParagraphTyping();
-                resetTypedParagraphs(".type-s1");
+                title.classList.remove("show");
+                para.classList.remove("show");
+                btn.classList.remove("show");
 
                 setTimeout(() => {
 
-                    // 🎬 h1 animation
+                    // 🎬 title fade-in
                     title.classList.add("show");
 
-                    // ⏳ h1 ke baad paragraph typing
-                    if (!s1Typed) {
-                        setTimeout(() => {
-                            typeParagraphsOneByOne(
-                                document.querySelectorAll(".type-s1"),
-                                45,
-                                () => {
-                                    document.querySelector("#s1 .btn").classList.add("show");
-                                }
-                            );
+                    // ✨ paragraph soft fade-in (after title)
+                    setTimeout(() => {
+                        para.classList.add("show");
+                    }, 800);
 
-                            s1Typed = true;
-                        }, 1200); // SAME as CSS animation
-                    } else {
-                        document.querySelectorAll(".type-s1").forEach(p => {
-                            p.textContent = p.getAttribute("data-text");
-                        });
-
-                        // ✅ button wapas show karo
-                        document.querySelector("#s1 .btn").classList.add("show");
-                    }
-
+                    // 👉 button appear
+                    setTimeout(() => {
+                        btn.classList.add("show");
+                    }, 1600);
 
                 }, 100);
             }
+
 
             if (n === 2) {
                 const title = document.querySelector("#s2 .s2-title");

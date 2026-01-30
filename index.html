@@ -802,25 +802,6 @@
         const text = `May ALLAH bless you with endless joy, love, and success 💖✨. May every step you take be guided with happiness 🌸, every dream you hold turn into reality and may your heart always be filled with peace, laughter, and beautiful moments. May  this year bring you new adventures, sweet memories, and countless reasons to smile. Happy Birthday to someone truly special 🎉🎂💖`;
         const final = document.getElementById("final");
 
-        // ===== ✅ ULTRA OPTIMIZED: AUDIO POOL SYSTEM =====
-        const POOL_SIZE = 5; // ✅ 3 → 5 (more copies = smoother)
-        let typePool = [];
-        let spacePool = [];
-        let poolIndex = 0;
-
-        // Create multiple sound instances for ultra-smooth playback
-        for (let i = 0; i < POOL_SIZE; i++) {
-            let t = new Audio('music/type.wav');
-            t.volume = 0.015;
-            t.preload = 'auto';
-            typePool.push(t);
-            
-            let s = new Audio('music/space.wav');
-            s.volume = 0.008;
-            s.preload = 'auto';
-            spacePool.push(s);
-        }
-
         let i = 0;
         let currentScreen = 1;
         let typingTimeout;
@@ -833,8 +814,6 @@
         let s2Typed = false;
         let s3Typed = false;
         let s4Typed = false;
-
-        let lastTypeSoundTime = 0;
 
         // ===== SAFE PARAGRAPH TYPING SYSTEM =====
         function clearParagraphTyping() {
@@ -871,24 +850,9 @@
                     el.querySelector(".text").appendChild(span);
                     charIndex++;
 
-                    // 🔊 typewriter click
-                    if (char === " ") {
-                        playSpaceSound();
-                    } else {
-                        playTypeSound();
-                    }
 
                     if (charIndex < chars.length) {
-
-                        let charDelay = speed;
-
-                        const nextChar = chars[charIndex];
-
-                        if ([".", "!", "?"].includes(nextChar)) charDelay += 400;
-                        if ([",", ";"].includes(nextChar)) charDelay += 200;
-
-                        paraTimeouts.push(setTimeout(typeChar, charDelay));
-
+                        paraTimeouts.push(setTimeout(typeChar, speed));
                     } else {
                         const cursor = el.querySelector(".cursor");
 
@@ -934,25 +898,11 @@
                 textSpan.appendChild(span);
                 index++;
 
-                // 🔊 typewriter click
-                if (char === " ") {
-                    playSpaceSound();
-                } else {
-                    playTypeSound();
-                }
 
                 if (index < chars.length) {
-
-                    let delay = Math.random() * 40 + 35;
-                    const nextChar = chars[index];
-
-                    if ([".", "!", "?"].includes(nextChar)) delay += 400;
-                    if ([",", ";"].includes(nextChar)) delay += 200;
-
+                    let delay = 45; // Fixed speed, no randomness
                     typingTimeout = setTimeout(write, delay);
-
                 } else {
-
                     setTimeout(() => {
                         cursor.style.boxShadow = "0 0 22px rgba(138,111,209,1)";
                         cursor.style.opacity = "0";
@@ -967,35 +917,6 @@
             write();
         }
 
-        // ===== ✅ ULTRA OPTIMIZED: Type Sound with Pool System =====
-        function playTypeSound() {
-            const now = performance.now();
-            if (now - lastTypeSoundTime < 75) return; // ✅ 65 → 75 (more throttling for smoothness)
-            lastTypeSoundTime = now;
-            
-            let sound = typePool[poolIndex];
-            poolIndex = (poolIndex + 1) % POOL_SIZE;
-            
-            if (sound.paused || sound.ended) {
-                sound.volume = 0.015 + Math.random() * 0.01;
-                sound.playbackRate = 0.7 + Math.random() * 0.05;
-                sound.currentTime = 0;
-                sound.play().catch(() => {});
-            }
-        }
-
-        // ===== ✅ ULTRA OPTIMIZED: Space Sound with Pool System =====
-        function playSpaceSound() {
-            let sound = spacePool[poolIndex];
-            poolIndex = (poolIndex + 1) % POOL_SIZE;
-            
-            if (sound.paused || sound.ended) {
-                sound.volume = 0.008 + Math.random() * 0.005;
-                sound.playbackRate = 0.6 + Math.random() * 0.04;
-                sound.currentTime = 0;
-                sound.play().catch(() => {});
-            }
-        }
 
         function next(n) {
 
@@ -1168,10 +1089,6 @@
 
         function prev() {
 
-            // ===== ✅ OPTIMIZED: Stop all pool sounds =====
-            typePool.forEach(s => { s.pause(); s.currentTime = 0; });
-            spacePool.forEach(s => { s.pause(); s.currentTime = 0; });
-
             if (currentScreen > 1) {
                 next(currentScreen - 1);
             }
@@ -1224,11 +1141,10 @@
             c.className = "confetti";
             
             const symbols = ["❤️", "✨"];
-            const chosenSymbol = symbols[Math.random() < 0.5 ? 0 : 1]; // ✅ faster than Math.floor
+            const chosenSymbol = symbols[Math.random() < 0.5 ? 0 : 1];
             
             let size = chosenSymbol === "❤️" ? (12 + Math.random() * 6) : (18 + Math.random() * 6);
             
-            // ✅ Batch all styles at once (much faster)
             c.style.cssText = `
                 left: ${Math.random() * 100}vw;
                 font-size: ${size}px;
@@ -1250,7 +1166,6 @@
             h.className = "heart";
             h.innerText = "❤️";
             
-            // ✅ Batch styles
             h.style.cssText = `
                 left: ${Math.random() * 100}vw;
                 font-size: ${16 + Math.random() * 12}px;
@@ -1264,11 +1179,10 @@
         // ===== ✅ ULTRA OPTIMIZED: Petal with Batched Styles =====
         function createPetal() {
             const petal = document.createElement("div");
-            petal.className = "petal"; // ✅ className faster than classList
+            petal.className = "petal";
             
             const size = 10 + Math.random() * 8;
             
-            // ✅ Batch styles for performance
             petal.style.cssText = `
                 left: ${Math.random() * window.innerWidth}px;
                 width: ${size}px;
@@ -1311,9 +1225,9 @@
 
             const symbols = ["✨", "💜", "🎉", "🎊", "💫", "💖"];
 
-            const TOTAL_PARTICLES = 280; // ✅ 350 → 280 (smoother)
-            const DURATION = 1600;       // ✅ 1800 → 1600 (faster cleanup)
-            const PER_FRAME = 2;         // ✅ 3 → 2 (less per frame)
+            const TOTAL_PARTICLES = 280;
+            const DURATION = 1600;
+            const PER_FRAME = 2;
 
             let created = 0;
             let startTime = null;
@@ -1362,14 +1276,14 @@
 
         // ===== ✅ PERFECTLY BALANCED: Beautiful Petals =====
         let petalCount = 0;
-        const MAX_PETALS = 20; // 🌸 Perfect balance: 20 petals = beautiful + buttery smooth
+        const MAX_PETALS = 20;
 
         setInterval(() => {
             if (petalCount < MAX_PETALS) {
                 createPetal();
                 petalCount++;
             }
-        }, 350); // 🌸 Slightly faster spawn for more visible petals
+        }, 350);
 
         next(1);
 

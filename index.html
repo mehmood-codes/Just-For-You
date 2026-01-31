@@ -116,6 +116,7 @@
             backface-visibility: hidden;
         }
 
+        /* FIX 6: Confetti/Heart use 'fall', Petals use 'petalFall' — no name clash */
         @keyframes fall {
             to {
                 transform: translateY(110vh) rotate(360deg);
@@ -137,7 +138,8 @@
             margin-top: 25px;
             opacity: 0;
             transform: translateY(15px);
-            transition: 1.2s ease;
+            /* FIX 11: explicit property names instead of bare '1.2s ease' */
+            transition: opacity 1.2s ease, transform 1.2s ease;
         }
 
         .final.show {
@@ -168,6 +170,15 @@
             justify-content: center;
             margin-top: 0px;
             margin-bottom: 45px;
+
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 1.2s ease, transform 1.2s ease;
+        }
+
+        .cake-zone.show {
+            opacity: 1;
+            transform: translateY(0);
         }
 
         .cake-wrapper {
@@ -428,13 +439,15 @@
             opacity: 0.75;
             border-radius: 50% 50% 50% 0;
             transform: rotate(0deg);
-            animation: fall linear infinite;
+            /* FIX 6: Petals now use 'petalFall' so they don't clash with confetti 'fall' */
+            animation: petalFall linear infinite;
             z-index: 2;
             will-change: transform;
             backface-visibility: hidden;
         }
 
-        @keyframes fall {
+        /* FIX 6: Renamed from 'fall' to 'petalFall' to avoid overwriting confetti's 'fall' */
+        @keyframes petalFall {
             0% {
                 transform: translateX(0) translateY(0) rotate(0deg);
             }
@@ -834,20 +847,25 @@
         const music = document.getElementById("music");
         const typing = document.getElementById("typing");
         const text = `May ALLAH bless you with endless joy, love, and success 💖✨. May every step you take be guided with happiness 🌸, every dream you hold turn into reality and may your heart always be filled with peace, laughter, and beautiful moments. May  this year bring you new adventures, sweet memories, and countless reasons to smile. Happy Birthday to someone truly special 🎉🎂💖`;
-        const final = document.getElementById("final");
 
-        let i = 0;
+        // FIX 2: Removed unused 'let i = 0;'
+        // FIX 5: Removed unused global 'const final' (it's declared locally where needed)
+
         let currentScreen = 1;
         let typingTimeout;
         let paraTimeouts = [];
-        let finalTimeout;
         let musicStarted = false;
 
-        // ===== TYPING RUN-ONCE FLAGS =====
-        let s1Typed = false;
+        // FIX 3: Removed unused 's1Typed' flag
+        // FIX 4: Removed unused 'finalTimeout' variable
         let s2Typed = false;
         let s3Typed = false;
         let s4Typed = false;
+
+        // FIX 8: Finale intervals stored globally so they can be cleared on navigation
+        let finaleConfettiInterval = null;
+        let finaleHeartInterval = null;
+        let finaleStopTimeout = null;
 
         // ===== SAFE PARAGRAPH TYPING SYSTEM =====
         function clearParagraphTyping() {
@@ -934,7 +952,7 @@
 
 
                 if (index < chars.length) {
-                    let delay = 45; // Fixed speed, no randomness
+                    let delay = 45;
                     typingTimeout = setTimeout(write, delay);
                 } else {
                     setTimeout(() => {
@@ -942,12 +960,10 @@
                         cursor.style.opacity = "0";
                     }, 400);
 
-                    // button thora jaldi
                     setTimeout(() => {
                         if (onComplete) onComplete();
                     }, 700);
 
-                    // cursor thora baad me clean ho
                     setTimeout(() => {
                         cursor.remove();
                     }, 1200);
@@ -961,13 +977,13 @@
         function fadeSequence({ title, paragraph, button }) {
 
             // reset
-            title.classList.remove("show");
+            if (title) title.classList.remove("show");
             paragraph.classList.remove("show");
             button.classList.remove("show");
 
             // h fade in
             setTimeout(() => {
-                title.classList.add("show");
+                if (title) title.classList.add("show");
 
                 // p fade in
                 setTimeout(() => {
@@ -986,7 +1002,24 @@
 
         function next(n) {
 
-            document.querySelectorAll(".confetti, .heart").forEach(e => e.remove());
+            // Navigation cleanup:
+            // .confetti-explode (blast) — instant effect, remove immediately
+            // .confetti / .heart — already falling, let them finish naturally (don't remove)
+            // Finale intervals — stop NEW generation only
+            document.querySelectorAll(".confetti-explode").forEach(e => e.remove());
+
+            if (finaleConfettiInterval) {
+                clearInterval(finaleConfettiInterval);
+                finaleConfettiInterval = null;
+            }
+            if (finaleHeartInterval) {
+                clearInterval(finaleHeartInterval);
+                finaleHeartInterval = null;
+            }
+            if (finaleStopTimeout) {
+                clearTimeout(finaleStopTimeout);
+                finaleStopTimeout = null;
+            }
 
             document.querySelectorAll("#s" + n + " .btn").forEach(b => {
                 b.classList.remove("show");
@@ -1069,10 +1102,9 @@
 
                 } else {
 
-                    // typing dobara nahi
                     document.querySelectorAll(".type-s2").forEach(p => {
                         p.textContent = p.getAttribute("data-text");
-                        p.classList.add("s1-fade"); // reuse fade style
+                        p.classList.add("s1-fade");
                     });
 
                     fadeSequence({
@@ -1098,11 +1130,13 @@
 
                 } else {
 
+                    // FIX 12: Screen 3 has no separate title — h1 IS the typing element.
+                    // So we skip title in fadeSequence and just fade paragraph + button.
                     typing.textContent = text;
                     typing.classList.add("s1-fade");
 
                     fadeSequence({
-                        title: document.querySelector("#s3 h1"),
+                        title: null,
                         paragraph: typing,
                         button: document.querySelector("#s3 .btn")
                     });
@@ -1113,13 +1147,16 @@
             if (n === 4) {
 
                 const title = document.querySelector("#s4 .s2-title");
+                const cake = document.querySelector("#s4 .cake-zone");
                 const msg = document.getElementById("msg");
                 const final = document.getElementById("final");
 
-                // ===== RESET (safe & simple) =====
+                // FIX 1: Single clean reset block — all duplicates removed
+                cake.classList.remove("show");
                 title.classList.remove("show");
                 msg.classList.remove("show");
                 final.classList.remove("show");
+                document.querySelector("#s4 .btn").classList.remove("show");
 
                 // text hamesha ready rakho
                 msg.setAttribute(
@@ -1129,70 +1166,66 @@
 
                 final.textContent = `This was made just for you, ${name} 💖`;
 
-                // ===== STEP 1: heading fade =====
+                // 🧁 STEP 1: thora wait, phir cake
                 setTimeout(() => {
-                    title.classList.add("show");
 
-                    // ===== FIRST TIME =====
-                    if (!s4Typed) {
+                    cake.classList.add("show"); // 🎂 cake fade-in
 
-                        // msg typing se pehle bilkul khali
-                        msg.innerHTML = "";
+                    // 🧠 STEP 2: cake ke baad thora wait
+                    setTimeout(() => {
 
-                        setTimeout(() => {
+                        // STEP 3: heading
+                        title.classList.add("show");
 
-                            // typing start
-                            typeParagraphsOneByOne(
-                                [msg],
-                                45,
-                                () => {
+                        // STEP 4: typing (first time)
+                        if (!s4Typed) {
+
+                            msg.innerHTML = "";
+
+                            setTimeout(() => {
+
+                                typeParagraphsOneByOne([msg], 45, () => {
 
                                     setTimeout(() => {
-                                        // pehle final line
                                         final.classList.add("show");
 
-                                        // ⏳ phir thora delay ke baad button
                                         setTimeout(() => {
                                             document.querySelector("#s4 .btn").classList.add("show");
                                         }, 900);
 
                                     }, 700);
 
+                                });
 
-                                }
-                            );
+                                msg.classList.add("show");
+                                s4Typed = true;
 
-                            // typing start hote hi msg visible
-                            msg.classList.add("show");
+                            }, 800);
 
-                            s4Typed = true;
+                        }
+                        // STEP 5: second time (no typing)
+                        else {
 
-                        }, 900);
-
-                    }
-                    // ===== SECOND TIME =====
-                    else {
-
-                        // typing nahi, seedha text
-                        msg.textContent = msg.getAttribute("data-text");
-
-                        setTimeout(() => {
-                            msg.classList.add("show");
+                            msg.textContent = msg.getAttribute("data-text");
 
                             setTimeout(() => {
-                                final.classList.add("show");
+                                msg.classList.add("show");
 
                                 setTimeout(() => {
-                                    document.querySelector("#s4 .btn").classList.add("show");
-                                }, 900);
+                                    final.classList.add("show");
 
-                            }, 700);
+                                    setTimeout(() => {
+                                        document.querySelector("#s4 .btn").classList.add("show");
+                                    }, 900);
 
+                                }, 700);
 
-                        }, 900);
-                    }
+                            }, 800);
+                        }
 
-                }, 100);
+                    }, 1500); // ⏳ cake ke baad ka wait
+
+                }, 1000); // ⏳ card ke baad cake ka wait
 
                 finale();
             }
@@ -1261,16 +1294,22 @@
             }
         }
 
+        // FIX 8: finale() now stores intervals globally so next() can clear them
         function finale() {
 
-            if (finalTimeout) clearTimeout(finalTimeout);
+            // Clear any previous finale that's still running
+            if (finaleConfettiInterval) clearInterval(finaleConfettiInterval);
+            if (finaleHeartInterval) clearInterval(finaleHeartInterval);
+            if (finaleStopTimeout) clearTimeout(finaleStopTimeout);
 
-            const confettiInterval = setInterval(confetti, 500);
-            const heartInterval = setInterval(heart, 700);
+            finaleConfettiInterval = setInterval(confetti, 500);
+            finaleHeartInterval = setInterval(heart, 700);
 
-            setTimeout(() => {
-                clearInterval(confettiInterval);
-                clearInterval(heartInterval);
+            finaleStopTimeout = setTimeout(() => {
+                clearInterval(finaleConfettiInterval);
+                clearInterval(finaleHeartInterval);
+                finaleConfettiInterval = null;
+                finaleHeartInterval = null;
             }, 10000);
         }
 
@@ -1414,7 +1453,7 @@
             setTimeout(() => p.remove(), 1600);
         }
 
-        // ===== ✅ PERFECTLY BALANCED: Beautiful Petals =====
+        // ===== PETALS: Always running, respects live limit =====
         let petalCount = 0;
         const MAX_PETALS = 20;
 
@@ -1423,6 +1462,8 @@
                 createPetal();
                 petalCount++;
             }
+            // interval keeps running — petals remove themselves after 12s
+            // and do petalCount--, so new ones auto-spawn to replace them
         }, 350);
 
         next(1);

@@ -147,7 +147,16 @@
 
         #msg {
             white-space: pre-line;
+            opacity: 0;
+            transform: translateY(15px);
+            transition: opacity 1.2s ease, transform 1.2s ease;
         }
+
+        #msg.show {
+            opacity: 0.95;
+            transform: translateY(0);
+        }
+
 
         /* ============================================
            🎂 RESPONSIVE CAKE
@@ -788,7 +797,32 @@
 
             <p class="final" id="final"></p>
 
+            <div class="btn" onclick="next(5)">
+                Tap to Continue
+            </div>
+
         </div>
+
+
+        <!-- ========== SCREEN 5 (LAST) ========== -->
+
+        <div class="card hidden" id="s5">
+
+            <h1 class="s2-title">
+                One Last Thing 💖
+            </h1>
+
+            <p class="s1-fade">
+                I hope this little surprise made you smile today 🌸
+                Some moments are small, but they stay in the heart forever.
+            </p>
+
+            <p class="final">
+                Always remember — you matter more than you know 💫
+            </p>
+
+        </div>
+
 
     </div>
 
@@ -908,13 +942,45 @@
                         cursor.style.opacity = "0";
                     }, 400);
 
+                    // button thora jaldi
+                    setTimeout(() => {
+                        if (onComplete) onComplete();
+                    }, 700);
+
+                    // cursor thora baad me clean ho
                     setTimeout(() => {
                         cursor.remove();
-                        if (onComplete) onComplete();
                     }, 1200);
+
                 }
             }
             write();
+        }
+
+
+        function fadeSequence({ title, paragraph, button }) {
+
+            // reset
+            title.classList.remove("show");
+            paragraph.classList.remove("show");
+            button.classList.remove("show");
+
+            // h fade in
+            setTimeout(() => {
+                title.classList.add("show");
+
+                // p fade in
+                setTimeout(() => {
+                    paragraph.classList.add("show");
+
+                    // btn show
+                    setTimeout(() => {
+                        button.classList.add("show");
+                    }, 800);
+
+                }, 800);
+
+            }, 100);
         }
 
 
@@ -1003,14 +1069,19 @@
 
                 } else {
 
-                    title.classList.add("show");
-
+                    // typing dobara nahi
                     document.querySelectorAll(".type-s2").forEach(p => {
                         p.textContent = p.getAttribute("data-text");
+                        p.classList.add("s1-fade"); // reuse fade style
                     });
 
-                    document.querySelector("#s2 .btn").classList.add("show");
+                    fadeSequence({
+                        title: title,
+                        paragraph: document.querySelector(".type-s2"),
+                        button: document.querySelector("#s2 .btn")
+                    });
                 }
+
             }
 
             if (n === 3) {
@@ -1026,63 +1097,136 @@
                     }, 150);
 
                 } else {
+
                     typing.textContent = text;
-                    document.querySelector("#s3 .btn").classList.add("show");
+                    typing.classList.add("s1-fade");
+
+                    fadeSequence({
+                        title: document.querySelector("#s3 h1"),
+                        paragraph: typing,
+                        button: document.querySelector("#s3 .btn")
+                    });
                 }
+
             }
 
             if (n === 4) {
 
                 const title = document.querySelector("#s4 .s2-title");
                 const msg = document.getElementById("msg");
+                const final = document.getElementById("final");
 
+                // ===== RESET (safe & simple) =====
                 title.classList.remove("show");
-                clearParagraphTyping();
-                resetTypedParagraphs("#msg");
+                msg.classList.remove("show");
+                final.classList.remove("show");
 
+                // text hamesha ready rakho
+                msg.setAttribute(
+                    "data-text",
+                    `Dear ${name}, 💖 You are loved more than words can say. Close your eyes and make a wish ✨`
+                );
+
+                final.textContent = `This was made just for you, ${name} 💖`;
+
+                // ===== STEP 1: heading fade =====
                 setTimeout(() => {
-
                     title.classList.add("show");
 
+                    // ===== FIRST TIME =====
                     if (!s4Typed) {
 
-                        msg.setAttribute(
-                            "data-text",
-                            `Dear ${name},💖 You are loved more than words can say. Close your eyes and make a wish ✨`
-                        );
+                        // msg typing se pehle bilkul khali
+                        msg.innerHTML = "";
 
                         setTimeout(() => {
+
+                            // typing start
                             typeParagraphsOneByOne(
                                 [msg],
                                 45,
                                 () => {
 
                                     setTimeout(() => {
-                                        final.textContent = `This was made just for you, ${name} 💖`;
+                                        // pehle final line
                                         final.classList.add("show");
-                                    }, 900);
 
-                                    document.querySelector("#s4 .btn")?.classList.add("show");
+                                        // ⏳ phir thora delay ke baad button
+                                        setTimeout(() => {
+                                            document.querySelector("#s4 .btn").classList.add("show");
+                                        }, 900);
+
+                                    }, 700);
+
+
                                 }
                             );
 
+                            // typing start hote hi msg visible
+                            msg.classList.add("show");
+
                             s4Typed = true;
-                        }, 1200);
 
-                    } else {
-                        msg.textContent =
-                            `Dear ${name},💖 You are loved more than words can say. Close your eyes and make a wish ✨`;
+                        }, 900);
 
-                        final.textContent = `This was made just for you, ${name} 💖`;
-                        final.classList.add("show");
+                    }
+                    // ===== SECOND TIME =====
+                    else {
 
-                        document.querySelector("#s4 .btn")?.classList.add("show");
+                        // typing nahi, seedha text
+                        msg.textContent = msg.getAttribute("data-text");
+
+                        setTimeout(() => {
+                            msg.classList.add("show");
+
+                            setTimeout(() => {
+                                final.classList.add("show");
+
+                                setTimeout(() => {
+                                    document.querySelector("#s4 .btn").classList.add("show");
+                                }, 900);
+
+                            }, 700);
+
+
+                        }, 900);
                     }
 
                 }, 100);
 
                 finale();
             }
+
+            if (n === 5) {
+
+                const title = document.querySelector("#s5 .s2-title");
+                const para1 = document.querySelector("#s5 .s1-fade");
+                const para2 = document.querySelector("#s5 .final");
+
+                // reset sab
+                title.classList.remove("show");
+                para1.classList.remove("show");
+                para2.classList.remove("show");
+
+                // STEP 1: heading
+                setTimeout(() => {
+                    title.classList.add("show");
+
+                    // STEP 2: first paragraph
+                    setTimeout(() => {
+                        para1.classList.add("show");
+
+                        // STEP 3: last emotional line
+                        setTimeout(() => {
+                            para2.classList.add("show");
+                        }, 1200);
+
+                    }, 1200);
+
+                }, 300);
+            }
+
+
 
             updateBackButton();
         }
@@ -1118,13 +1262,8 @@
         }
 
         function finale() {
-            const msg = document.getElementById("msg");
-            const final = document.getElementById("final");
 
             if (finalTimeout) clearTimeout(finalTimeout);
-
-            final.textContent = "";
-            final.classList.remove("show");
 
             const confettiInterval = setInterval(confetti, 500);
             const heartInterval = setInterval(heart, 700);
@@ -1135,16 +1274,17 @@
             }, 10000);
         }
 
+
         // ===== ✅ ULTRA OPTIMIZED: Confetti with Batched Styles =====
         function confetti() {
             const c = document.createElement("div");
             c.className = "confetti";
-            
+
             const symbols = ["❤️", "✨"];
             const chosenSymbol = symbols[Math.random() < 0.5 ? 0 : 1];
-            
+
             let size = chosenSymbol === "❤️" ? (12 + Math.random() * 6) : (18 + Math.random() * 6);
-            
+
             c.style.cssText = `
                 left: ${Math.random() * 100}vw;
                 font-size: ${size}px;
@@ -1152,10 +1292,10 @@
                 animation-duration: ${3 + Math.random() * 2}s;
                 transform: rotate(${Math.random() * 360}deg);
             `;
-            
+
             c.innerText = chosenSymbol;
             document.body.appendChild(c);
-            
+
             setTimeout(() => c.style.opacity = 0, 3000);
             setTimeout(() => c.remove(), 6000);
         }
@@ -1165,13 +1305,13 @@
             const h = document.createElement("div");
             h.className = "heart";
             h.innerText = "❤️";
-            
+
             h.style.cssText = `
                 left: ${Math.random() * 100}vw;
                 font-size: ${16 + Math.random() * 12}px;
                 animation-duration: ${3 + Math.random() * 2}s;
             `;
-            
+
             document.body.appendChild(h);
             setTimeout(() => h.remove(), 7000);
         }
@@ -1180,18 +1320,18 @@
         function createPetal() {
             const petal = document.createElement("div");
             petal.className = "petal";
-            
+
             const size = 10 + Math.random() * 8;
-            
+
             petal.style.cssText = `
                 left: ${Math.random() * window.innerWidth}px;
                 width: ${size}px;
                 height: ${size}px;
                 animation-duration: ${6 + Math.random() * 6}s;
             `;
-            
+
             document.body.appendChild(petal);
-            
+
             setTimeout(() => {
                 petal.remove();
                 petalCount--;

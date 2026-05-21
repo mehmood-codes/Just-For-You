@@ -23,10 +23,8 @@
 
         body {
             min-height: 100vh;
-            min-height: 100dvh;
             background: url("images/bg.jpg") no-repeat center/cover;
             overflow: hidden;
-            touch-action: none;
         }
 
         body,
@@ -48,7 +46,6 @@
             position: fixed;
             inset: 0;
             background: rgba(0, 0, 0, 0.45);
-            -webkit-backdrop-filter: blur(6px);
             backdrop-filter: blur(6px);
             display: flex;
             align-items: center;
@@ -81,6 +78,7 @@
             font-size: 1.1rem;
             line-height: 1.6;
             opacity: .9;
+            margin-bottom: 15px;
         }
 
         .btn {
@@ -710,6 +708,172 @@
         #s4 h1 {
             margin-top: 280px;
         }
+
+
+        /* ===== SCREEN 5 SCROLLABLE CARD ===== */
+
+        #s5.card {
+            max-height: 80vh;
+            overflow: hidden;
+            /* 🔒 sab kuch andar clip */
+            border-radius: 26px;
+            padding: 0;
+            position: relative;
+            /* 👈 ye zaroori hai */
+        }
+
+        #s5 .s5-inner {
+            max-height: 80vh;
+            overflow-y: auto;
+            overflow-x: hidden;
+
+            padding: 44px 30px 60px 30px;
+            box-sizing: border-box;
+
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        #s5 .s5-inner::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #s5 .s5-inner::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.12);
+            border-radius: 10px;
+        }
+
+        #s5 .s5-inner::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #7b5fc9, #6ec1ff);
+            border-radius: 10px;
+        }
+
+        #s5.card::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #6a4fb8, #5db0ef);
+        }
+
+        /* Scroll indicator wrapper - OUTSIDE card, fixed to screen */
+        #s5-scroll-arrow {
+            position: fixed;
+            bottom: 12vh;
+            left: 50%;
+            transform: translateX(-50%);
+            pointer-events: none;
+            z-index: 1002;
+            transition: opacity 0.3s ease;
+        }
+
+        #s5-scroll-arrow.hide {
+            opacity: 0;
+        }
+
+        /* Scroll indicator icon - bounces in place */
+        #s5-scroll-arrow i {
+            color: #fff;
+            font-size: 28px;
+
+            text-shadow:
+                0 0 2px #000,
+                0 0 4px #000,
+                0 4px 6px #000,
+                0 0 12px rgba(174, 142, 255, 0.8);
+
+            animation: arrowBounce 1.5s ease-in-out infinite;
+        }
+
+
+        @keyframes arrowBounce {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(10px);
+            }
+        }
+
+        /* Mobile specific adjustments */
+        @media (max-width: 600px) {
+
+            #s5 .s5-inner {
+                max-height: 75vh;
+                padding: 22px 20px 60px 20px;
+                scrollbar-width: none;
+            }
+
+            #s5 .s5-inner::-webkit-scrollbar {
+                display: none;
+            }
+
+            #s5-scroll-arrow {
+                bottom: 14vh;
+            }
+
+            #s5-scroll-arrow i {
+                font-size: 24px;
+                filter: drop-shadow(0 0 10px rgba(174, 142, 255, 0.7));
+            }
+
+        }
+
+        /* S5 paragraph styling with staggered fade-in */
+        #s5 .fade-p {
+            opacity: 0;
+            transform: translateY(15px);
+            transition: opacity 1.2s ease, transform 1.2s ease;
+            margin-bottom: 30px;
+            /* 👈 NEW GAP */
+        }
+
+        #s5 .fade-p.show {
+            opacity: 0.95;
+            transform: translateY(0);
+        }
+
+        /* ===== SCREEN 5 BOTTOM GRADIENT FADE ===== */
+        #s5 .s5-gradient {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 80px;
+
+            pointer-events: none;
+            /* click / scroll block na ho */
+
+            background: linear-gradient(to bottom,
+                    rgba(255, 255, 255, 0),
+                    rgba(255, 255, 255, 0.35));
+
+            border-radius: 0 0 26px 26px;
+        }
+
+
+        /* ===== SCREEN 5 HEADING SPACING ===== */
+        #s5 h1.s2-title {
+            margin-bottom: 35px;
+        }
+
+
+        /* ===== SCREEN 5 FINAL LINE SPACING ===== */
+        #s5 .final {
+            margin-top: 40px;
+        }
+
+
+        /* ===== SCREEN 5 FULL CARD FADE (SECOND TIME) ===== */
+        #s5.full-fade {
+            opacity: 0;
+            transform: translateY(25px);
+        }
+
+        #s5.full-fade.show {
+            opacity: 1;
+            transform: translateY(0);
+            transition: opacity 1.2s ease, transform 1.2s ease;
+        }
     </style>
 
 </head>
@@ -756,7 +920,7 @@
         <div class="card hidden" id="s2">
 
             <h1 class="s2-title">
-                Happy Birthday Ishmal 🎂
+                Happy Birthday Taiba 🎂
             </h1>
 
             <p class="type-s2"
@@ -820,20 +984,72 @@
         <!-- ========== SCREEN 5 (LAST) ========== -->
 
         <div class="card hidden" id="s5">
+            <div class="s5-inner">
 
-            <h1 class="s2-title">
-                One Last Thing 💖
-            </h1>
+                <h1 class="s2-title">
+                    One Last Thing 💖
+                </h1>
 
-            <p class="s1-fade">
-                I hope this little surprise made you smile today 🌸
-                Some moments are small, but they stay in the heart forever.
-            </p>
+                <p class="fade-p">
+                    Maybe these are my last words to you from my heart through this site… so please, read them
+                    carefully.
+                </p>
 
-            <p class="final">
-                Always remember — you matter more than you know 💫
-            </p>
+                <p class="fade-p">
+                    Dear Taiba, as you know, I’m not able to do much more than this. I think we had a lot of problems
+                    between us, but none of them was more important to me than you. I don’t know what our future will
+                    be, or
+                    even my own. I don’t know what my destiny holds. But after all, I just wanted to try my best to make
+                    a
+                    beautiful moment for you. Maybe I don’t even have the right to do this… but I wanted to, so I did.
+                </p>
 
+                <p class="fade-p">
+                    You came into my life so unexpectedly, and I got so close to you mentally that I didn’t even
+                    realize… I
+                    still want to be all yours and make you mine forever, but maybe you’ll just remain a beautiful
+                    memory in
+                    my heart forever. It’s kind of sad, but who knows what the future will bring. It is what it is.
+                </p>
+
+                <p class="fade-p">
+                    Even if we can’t be together, it doesn’t matter. All I want is for you to go wherever life takes
+                    you,
+                    with happiness in your heart, and stay truly happy. I’m happy too, because I know how to accept my
+                    fate.
+                </p>
+
+                <p class="fade-p">
+                    I’ve always told you what was in my heart, because I don’t want to have any regrets later… and I
+                    don’t.
+                    I still love you just as much as I always have, even though I can’t express it… but let’s see what
+                    the
+                    future holds. Whatever ALLAH wills.
+                </p>
+
+                <p class="fade-p">
+                    Anyways, I hope this brings a smile to your heart and reminds you that you are truly someone’s
+                    special
+                    one, and how deeply cherished you are ✨
+                </p>
+
+                <p class="fade-p">
+                    Always remember — you matter more than you know 💫
+                </p>
+
+                <p class="final">
+                    Happy Birthday again…!
+                </p>
+
+            </div>
+
+            <div class="s5-gradient"></div>
+
+        </div>
+
+        <!-- Scroll Indicator (OUTSIDE card - fixed to screen) -->
+        <div id="s5-scroll-arrow" class="hide">
+            <i class="fa-solid fa-chevron-down"></i>
         </div>
 
 
@@ -843,7 +1059,7 @@
 
     <script>
 
-        const name = "Ishmal";
+        const name = "Taiba";
         const music = document.getElementById("music");
         const typing = document.getElementById("typing");
         const text = `May ALLAH bless you with endless joy, love, and success 💖✨. May every step you take be guided with happiness 🌸, every dream you hold turn into reality and may your heart always be filled with peace, laughter, and beautiful moments. May  this year bring you new adventures, sweet memories, and countless reasons to smile. Happy Birthday to someone truly special 🎉🎂💖`;
@@ -861,6 +1077,8 @@
         let s2Typed = false;
         let s3Typed = false;
         let s4Typed = false;
+
+        let s5AnimatedOnce = false;
 
         // ===== SAFE PARAGRAPH TYPING SYSTEM =====
         function clearParagraphTyping() {
@@ -1012,6 +1230,11 @@
             currentScreen = n;
 
             if (typingTimeout) clearTimeout(typingTimeout);
+
+            // Hide scroll arrow when NOT on screen 5
+            if (n !== 5) {
+                hideScrollArrow();
+            }
 
             if (n === 1) {
 
@@ -1221,29 +1444,98 @@
 
             if (n === 5) {
 
+                const s5Card = document.getElementById("s5");
+                const s5Inner = document.querySelector("#s5 .s5-inner");
                 const title = document.querySelector("#s5 .s2-title");
-                const para1 = document.querySelector("#s5 .s1-fade");
-                const para2 = document.querySelector("#s5 .final");
+                const paragraphs = document.querySelectorAll("#s5 .fade-p");
+                const finalPara = document.querySelector("#s5 .final");
+                const scrollArrow = document.getElementById("s5-scroll-arrow");
 
-                // reset sab
+                // 🔁 scroll hamesha top se
+                if (s5Inner) s5Inner.scrollTop = 0;
+
+                // ❌ sab kuch pehle hi hide
+                s5Card.classList.remove("show", "full-fade");
+
                 title.classList.remove("show");
-                para1.classList.remove("show");
-                para2.classList.remove("show");
+                paragraphs.forEach(p => p.classList.remove("show"));
+                finalPara.classList.remove("show");
+
+                // arrow hide initially
+                if (scrollArrow) scrollArrow.classList.add("hide");
+
+                if (!s5AnimatedOnce) {
+
+                    // 🔹 heading
+                    setTimeout(() => {
+                        title.classList.add("show");
+
+                        // 🔹 paragraphs ek ek
+                        paragraphs.forEach((p, index) => {
+                            setTimeout(() => {
+                                p.classList.add("show");
+                            }, 900 + index * 700);
+                        });
+
+                        // 🔹 final line
+                        setTimeout(() => {
+                            finalPara.classList.add("show");
+
+                            // scroll logic start
+                            setTimeout(() => {
+                                initScreen5Scroll();
+                            }, 500);
+
+                        }, 900 + paragraphs.length * 700 + 700);
+
+                    }, 300);
+
+                    // 🧠 YAAD RAKHO: first time ho chuka
+                    s5AnimatedOnce = true;
+                }
+
+                else {
+
+                    // 💡 poora card ek sath fade
+                    s5Card.classList.add("full-fade");
+
+                    setTimeout(() => {
+                        s5Card.classList.add("show");
+
+                        // text visible ek sath
+                        title.classList.add("show");
+                        paragraphs.forEach(p => p.classList.add("show"));
+                        finalPara.classList.add("show");
+
+                        // scroll logic
+                        setTimeout(() => {
+                            initScreen5Scroll();
+                        }, 500);
+
+                    }, 100);
+                }
 
                 // STEP 1: heading
                 setTimeout(() => {
                     title.classList.add("show");
 
-                    // STEP 2: first paragraph
-                    setTimeout(() => {
-                        para1.classList.add("show");
-
-                        // STEP 3: last emotional line
+                    // STEP 2: staggered paragraphs
+                    paragraphs.forEach((p, index) => {
                         setTimeout(() => {
-                            para2.classList.add("show");
-                        }, 1200);
+                            p.classList.add("show");
+                        }, 1000 + (index * 700)); // 700ms delay between each paragraph
+                    });
 
-                    }, 1200);
+                    // STEP 3: final emotional line (after all fade-p)
+                    setTimeout(() => {
+                        finalPara.classList.add("show");
+
+                        // Initialize scroll monitoring after all content is visible
+                        setTimeout(() => {
+                            initScreen5Scroll();
+                        }, 500);
+
+                    }, 1000 + (paragraphs.length * 700) + 700);
 
                 }, 300);
             }
@@ -1265,12 +1557,7 @@
 
         document.addEventListener('touchstart', (e) => {
             touchStartX = e.changedTouches[0].screenX;
-        }, { passive: true });
-
-        // iOS scroll/pinch lock
-        document.addEventListener('touchmove', (e) => {
-            e.preventDefault();
-        }, { passive: false });
+        });
 
         document.addEventListener('touchend', (e) => {
             let touchEndX = e.changedTouches[0].screenX;
@@ -1387,6 +1674,9 @@
         // ===== ✅ ULTRA OPTIMIZED: Blast with Fewer Particles =====
         function BUTTERY_MEGA_BLAST() {
 
+            playBlastSound();
+            screenShake();
+
             const symbols = ["✨", "💜", "🎉", "🎊", "💫", "💖"];
 
             const TOTAL_PARTICLES = 280;
@@ -1412,15 +1702,7 @@
                 requestAnimationFrame(spawnFrame);
             }
 
-            // CROSS-BROWSER SYNC STRATEGY:
-            // Sound at 0ms (buffering starts)
-            // Visuals at 80ms (matches average browser audio latency)
-            playBlastSound();
-
-            setTimeout(() => {
-                screenShake();
-                requestAnimationFrame(spawnFrame);
-            }, 80);
+            requestAnimationFrame(spawnFrame);
         }
 
         function createOneBlastParticle(symbols) {
@@ -1456,6 +1738,48 @@
                 petalCount++;
             }
         }, 350);
+
+        // ===== SCREEN 5 SCROLL MANAGEMENT =====
+        function checkScrollPosition() {
+            const s5Card = document.querySelector("#s5 .s5-inner");
+            const scrollArrow = document.getElementById("s5-scroll-arrow");
+
+            if (!s5Card || !scrollArrow) return;
+
+            const scrollTop = s5Card.scrollTop;
+            const scrollHeight = s5Card.scrollHeight;
+            const clientHeight = s5Card.clientHeight;
+
+            // If scrolled to bottom (within 20px threshold)
+            if (scrollTop + clientHeight >= scrollHeight - 20) {
+                scrollArrow.classList.add("hide");
+            } else {
+                scrollArrow.classList.remove("hide");
+            }
+        }
+
+        function initScreen5Scroll() {
+            const s5Card = document.querySelector("#s5 .s5-inner");
+            const scrollArrow = document.getElementById("s5-scroll-arrow");
+
+            if (!s5Card || !scrollArrow) return;
+
+            // Remove any previous listener
+            s5Card.removeEventListener("scroll", checkScrollPosition);
+
+            // Add scroll listener
+            s5Card.addEventListener("scroll", checkScrollPosition);
+
+            // Show arrow and do initial check
+            scrollArrow.classList.remove("hide");
+            setTimeout(checkScrollPosition, 500);
+        }
+
+        // Hide scroll arrow when not on screen 5
+        function hideScrollArrow() {
+            const scrollArrow = document.getElementById("s5-scroll-arrow");
+            if (scrollArrow) scrollArrow.classList.add("hide");
+        }
 
         next(1);
 

@@ -111,13 +111,15 @@
             top: -10px;
             width: 8px;
             height: 14px;
-            animation: fall linear infinite;
+            /* BUG FIX 1: was using @keyframes fall (shared with petals, caused conflict).
+               Confetti/hearts now use their own dedicated animation. */
+            animation: fallDown linear infinite;
             will-change: transform;
             transform: translateZ(0);
             backface-visibility: hidden;
         }
 
-        @keyframes fall {
+        @keyframes fallDown {
             to {
                 transform: translateY(110vh) rotate(360deg);
             }
@@ -127,7 +129,8 @@
             position: fixed;
             top: -10px;
             font-size: 20px;
-            animation: fall linear forwards;
+            /* BUG FIX 1 (cont): same fix – use fallDown */
+            animation: fallDown linear forwards;
             text-shadow: none;
             will-change: transform;
             transform: translateZ(0);
@@ -170,15 +173,15 @@
             margin-top: 0px;
             margin-bottom: 45px;
 
-            /* 👇 NEW */
             opacity: 0;
-            transform: translateY(20px);
-            transition: opacity 1.2s ease, transform 1.2s ease;
+            /* BUG FIX 2: was transform: translateY(20px) which conflicted with
+               #s4 .cake-zone's transform: translateX(-50%).
+               Using opacity-only transition; position stays handled by the #s4 rule. */
+            transition: opacity 1.2s ease;
         }
 
         .cake-zone.show {
             opacity: 1;
-            transform: translateY(0);
         }
 
         .cake-wrapper {
@@ -439,6 +442,7 @@
             opacity: 0.75;
             border-radius: 50% 50% 50% 0;
             transform: rotate(0deg);
+            /* Petals keep their own @keyframes fall – no conflict now */
             animation: fall linear infinite;
             z-index: 2;
             will-change: transform;
@@ -699,6 +703,8 @@
             position: absolute;
             top: -80px;
             left: 50%;
+            /* BUG FIX 2 (cont): translateX(-50%) preserved here without
+               translateY conflict since .cake-zone.show no longer sets transform */
             transform: translateX(-50%);
             margin: 0 !important;
             padding: 0 !important;
@@ -707,6 +713,15 @@
 
         #s4 h1 {
             margin-top: 280px;
+        }
+
+        /* BUG FIX 3 (mobile): on small screens cake at top:-80px can overflow
+           the card edge and get clipped. Pull the card down slightly on mobile
+           so the cake has breathing room above it. */
+        @media (max-width: 600px) {
+            #s4.card {
+                margin-top: 140px !important;
+            }
         }
     </style>
 
@@ -826,11 +841,12 @@
         let currentScreen = 1;
         let typingTimeout;
         let paraTimeouts = [];
-        let finalTimeout;
+        // BUG FIX 4: finalTimeout now stores interval IDs so they can actually be cleared
+        let confettiInterval = null;
+        let heartInterval = null;
         let musicStarted = false;
 
         // ===== TYPING RUN-ONCE FLAGS =====
-        let s1Typed = false;
         let s2Typed = false;
         let s3Typed = false;
         let s4Typed = false;
@@ -1105,7 +1121,7 @@
                 const msg = document.getElementById("msg");
                 const final = document.getElementById("final");
 
-                // 🔴 STEP A: sab kuch chupa do (card blank feel)
+                // STEP A: sab kuch chupa do (card blank feel)
                 cake.classList.remove("show");
                 title.classList.remove("show");
                 msg.classList.remove("show");
@@ -1126,12 +1142,12 @@
 
                 // ===== STEP 0: CAKE FIRST =====
 
-                // 🧁 STEP 1: thora wait, phir cake
+                // STEP 1: thora wait, phir cake
                 setTimeout(() => {
 
-                    cake.classList.add("show"); // 🎂 cake fade-in
+                    cake.classList.add("show"); // cake fade-in
 
-                    // 🧠 STEP 2: cake ke baad thora wait
+                    // STEP 2: cake ke baad thora wait
                     setTimeout(() => {
 
                         // STEP 3: heading
@@ -1173,9 +1189,9 @@
                             }, 800);
                         }
 
-                    }, 1500); // ⏳ cake ke baad ka wait
+                    }, 1500); // cake ke baad ka wait
 
-                }, 1000); // ⏳ card ke baad cake ka wait
+                }, 1000); // card ke baad cake ka wait
 
                 finale();
             }
@@ -1195,14 +1211,14 @@
 
         document.addEventListener('touchstart', (e) => {
             touchStartX = e.changedTouches[0].screenX;
-        });
+        }, { passive: true }); // BUG FIX 5: passive listener for better mobile scroll performance
 
         document.addEventListener('touchend', (e) => {
             let touchEndX = e.changedTouches[0].screenX;
             if (touchEndX - touchStartX > 80) {
                 prev();
             }
-        });
+        }, { passive: true }); // BUG FIX 5 (cont)
 
         function updateBackButton() {
             const btn = document.querySelector(".back-btn");
@@ -1215,19 +1231,23 @@
 
         function finale() {
 
-            if (finalTimeout) clearTimeout(finalTimeout);
+            // BUG FIX 4: properly clear previous intervals before starting new ones
+            if (confettiInterval) clearInterval(confettiInterval);
+            if (heartInterval) clearInterval(heartInterval);
 
-            const confettiInterval = setInterval(confetti, 500);
-            const heartInterval = setInterval(heart, 700);
+            confettiInterval = setInterval(confetti, 500);
+            heartInterval = setInterval(heart, 700);
 
             setTimeout(() => {
                 clearInterval(confettiInterval);
                 clearInterval(heartInterval);
+                confettiInterval = null;
+                heartInterval = null;
             }, 10000);
         }
 
 
-        // ===== ✅ ULTRA OPTIMIZED: Confetti with Batched Styles =====
+        // ===== ULTRA OPTIMIZED: Confetti with Batched Styles =====
         function confetti() {
             const c = document.createElement("div");
             c.className = "confetti";
@@ -1252,7 +1272,7 @@
             setTimeout(() => c.remove(), 6000);
         }
 
-        // ===== ✅ ULTRA OPTIMIZED: Heart with Batched Styles =====
+        // ===== ULTRA OPTIMIZED: Heart with Batched Styles =====
         function heart() {
             const h = document.createElement("div");
             h.className = "heart";
@@ -1268,7 +1288,7 @@
             setTimeout(() => h.remove(), 7000);
         }
 
-        // ===== ✅ ULTRA OPTIMIZED: Petal with Batched Styles =====
+        // ===== ULTRA OPTIMIZED: Petal with Batched Styles =====
         function createPetal() {
             const petal = document.createElement("div");
             petal.className = "petal";
@@ -1309,7 +1329,7 @@
             }, 300);
         }
 
-        // ===== ✅ ULTRA OPTIMIZED: Blast with Fewer Particles =====
+        // ===== ULTRA OPTIMIZED: Blast with Fewer Particles =====
         function BUTTERY_MEGA_BLAST() {
 
             playBlastSound();
@@ -1366,7 +1386,7 @@
             setTimeout(() => p.remove(), 1600);
         }
 
-        // ===== ✅ PERFECTLY BALANCED: Beautiful Petals =====
+        // ===== PERFECTLY BALANCED: Beautiful Petals =====
         let petalCount = 0;
         const MAX_PETALS = 20;
 
